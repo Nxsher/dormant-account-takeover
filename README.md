@@ -1,4 +1,4 @@
-# dormant-account-takeover
+# dormant-account-takeover [SQLite]
 SQL analysis of dormant-account reactivation and potential account takeover patterns
 
 WITH transaction_history AS (
@@ -24,7 +24,6 @@ WITH transaction_history AS (
         ON transac_info.card_id = card_data.card_id
 ),
 
-
 reactivated_accounts AS (
     SELECT
         *,
@@ -37,7 +36,6 @@ reactivated_accounts AS (
         - julianday(previous_event_date) > 365
 ),
 
-
 identity_checks AS (
     SELECT
         reactivated_accounts.*,
@@ -48,10 +46,8 @@ identity_checks AS (
                 FROM transaction_history AS previous_history
                 WHERE previous_history.account_id =
                       reactivated_accounts.account_id
-
                   AND previous_history.device_id =
                       reactivated_accounts.device_id
-
                   AND previous_history.event_date <
                       reactivated_accounts.event_date
             )
@@ -65,10 +61,8 @@ identity_checks AS (
                 FROM transaction_history AS previous_history
                 WHERE previous_history.account_id =
                       reactivated_accounts.account_id
-
                   AND previous_history.ip_address =
                       reactivated_accounts.ip_address
-
                   AND previous_history.event_date <
                       reactivated_accounts.event_date
             )
@@ -82,10 +76,8 @@ identity_checks AS (
                 FROM transaction_history AS previous_history
                 WHERE previous_history.account_id =
                       reactivated_accounts.account_id
-
                   AND previous_history.card_id =
                       reactivated_accounts.card_id
-
                   AND previous_history.event_date <
                       reactivated_accounts.event_date
             )
@@ -99,13 +91,10 @@ identity_checks AS (
                 FROM transaction_history AS previous_history
                 WHERE previous_history.account_id =
                       reactivated_accounts.account_id
-
                   AND previous_history.cardholder_first_name =
                       reactivated_accounts.cardholder_first_name
-
                   AND previous_history.cardholder_last_name =
                       reactivated_accounts.cardholder_last_name
-
                   AND previous_history.event_date <
                       reactivated_accounts.event_date
             )
@@ -116,17 +105,14 @@ identity_checks AS (
     FROM reactivated_accounts
 ),
 
-
 suspicious_reactivations AS (
     SELECT *
     FROM identity_checks
-
     WHERE new_device = 1
       AND new_ip = 1
       AND new_card = 1
       AND new_cardholder_name = 1
 ),
-
 
 post_reactivation_purchases AS (
     SELECT
@@ -157,7 +143,6 @@ post_reactivation_purchases AS (
           suspicious_reactivations.event_date
 ),
 
-
 purchase_behavior AS (
     SELECT
         *,
@@ -186,8 +171,6 @@ purchase_behavior AS (
 
 SELECT *
 FROM purchase_behavior
-
 WHERE amount_increased = 1
   AND spaced_24_hours = 1
-
 ORDER BY account_id, event_date;
